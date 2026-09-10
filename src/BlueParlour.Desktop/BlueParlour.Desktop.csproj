@@ -4,7 +4,7 @@
     <OutputType>WinExe</OutputType>
     <UseWPF>true</UseWPF>
     <AssemblyName>TheBlueParlour</AssemblyName>
-    <Version>0.3.0</Version>
+    <Version>0.4.0</Version>
     <ApplicationIcon>Assets/Parlour.ico</ApplicationIcon>
     <Description>A cozy little exploration of attention.</Description>
   </PropertyGroup>

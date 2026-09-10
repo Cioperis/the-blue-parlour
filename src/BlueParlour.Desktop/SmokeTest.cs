@@ -21,14 +21,13 @@ internal static class SmokeTest
         for (var sitting = 0; sitting < 3; sitting++)
         {
             if (sitting > 0) vm.StartWord.Execute(null);
-            for (var trial = 0; trial < 12; trial++)
+            while (!game.Session!.Complete)
             {
-                var prompt = game.Session!.Current!;
-                vm.Answer.Execute((game.Session.Rule == Domain.AttentionRule.Ink ? prompt.Ink : prompt.Word).ToString());
+                vm.Answer.Execute(game.Session.Expected.ToString());
                 if (vm.Answer.CanExecute("Blue")) throw new InvalidOperationException("Duplicate answer allowed.");
                 vm.Next.Execute(null);
             }
-            if (!vm.IsSummary || game.Session!.Correct != 12) throw new InvalidOperationException("Summary transition failed.");
+            if (!vm.IsSummary || game.Session!.Correct != game.Session.Total) throw new InvalidOperationException("Summary transition failed.");
         }
         if (!vm.HasRose || !vm.HasCat || !vm.HasPainting) throw new InvalidOperationException("Keepsake progression failed.");
         Capture(window, output, "summary");
@@ -37,9 +36,7 @@ internal static class SmokeTest
         vm.StartShift.Execute(null);
         while (!game.Session!.Complete)
         {
-            var prompt = game.Session.Current!;
-            var answer = game.Session.CurrentRule == Domain.AttentionRule.Ink ? prompt.Ink : prompt.Word;
-            vm.Answer.Execute(answer.ToString()); vm.Next.Execute(null);
+            vm.Answer.Execute(game.Session.Expected.ToString()); vm.Next.Execute(null);
         }
         if (!vm.IsSummary || game.Session.Correct != 18) throw new InvalidOperationException("Shifting spotlight failed.");
         vm.Home.Execute(null);
@@ -64,12 +61,26 @@ internal static class SmokeTest
         if (vm.Opera.AwaitingCurtain) throw new InvalidOperationException("Opera curtain failed.");
         vm.Home.Execute(null);
         vm.StartQuiet.Execute(null);
+        Capture(window, output, "quiet-paths");
+        vm.Quiet.ChoosePath.Execute("GentleVoice");
         Capture(window, output, "quiet");
         for (var i = 0; i < 3; i++) vm.Quiet.Next.Execute(null);
         if (!vm.Quiet.Complete || vm.Quiet.Next.CanExecute(null)) throw new InvalidOperationException("Quiet moment completion failed.");
         Capture(window, output, "quiet-complete");
         vm.Quiet.Restart.Execute(null);
         if (vm.Quiet.Complete) throw new InvalidOperationException("Quiet moment reset failed.");
+        vm.Quiet.BackToPaths.Execute(null);
+        if (!vm.Quiet.IsChoosing) throw new InvalidOperationException("Quiet path navigation failed.");
+        vm.Home.Execute(null);
+        vm.StartCustomize.Execute(null);
+        vm.SetPalette.Execute("RoseVelvet");
+        vm.SetCompanion.Execute("Pug");
+        vm.SetDepth.Execute("Deep");
+        if (!vm.IsCustomize || !vm.IsPug || vm.PaletteName != "Rose velvet" || !vm.DepthName.StartsWith("Deep")) throw new InvalidOperationException("Customization failed.");
+        Capture(window, output, "customize");
+        vm.SetPalette.Execute("SageGlass");
+        vm.SetCompanion.Execute("Corgi");
+        Capture(window, output, "customize-sage");
         if (window.Icon is null) throw new InvalidOperationException("Window icon is missing.");
         vm.Home.Execute(null);
         // Verify scaled window layout at minimum size.
@@ -77,7 +88,7 @@ internal static class SmokeTest
         Capture(window, output, "small");
         vm.StartOpera.Execute(null);
         Capture(window, output, "opera-small");
-        File.WriteAllText(Path.Combine(output, "success.txt"), "Attention sittings, shifting rules, three opera acts, mismatch curtain, encore, quiet moments, icon, input gating, and eleven WPF renders passed.");
+        File.WriteAllText(Path.Combine(output, "success.txt"), "One-back attention sittings, shifting rules, three opera acts, mismatch curtain, encore, reflection paths, customization, icon, input gating, and fourteen WPF renders passed.");
         window.Close();
     }
     private static void Capture(MainWindow window, string output, string name)

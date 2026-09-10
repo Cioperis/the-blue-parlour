@@ -20,13 +20,35 @@ public class GameTests
   Assert.Throws<InvalidOperationException>(() => session.Submit(choice));
  }
  [Fact] public void RejectsEmptyDeck() => Assert.Throws<ArgumentException>(() => new AttentionSession([], AttentionRule.Ink));
- [Fact] public void DeckContainsEqualMatchingAndConflictingTrials()
+ [Fact] public void FocusedDeckUsesSixteenCardsWithMostlyConflictingTrials()
  {
   var game = new ParlourGame(new MemoryStore(), new Random(42));
   var session = game.Start(AttentionRule.Ink);
-  while (!session.Complete) session.Submit(session.Current!.Ink);
-  Assert.Equal(12, session.Correct);
-  Assert.Equal(6, session.Answers.Count(a => a.Prompt.IsCongruent));
+  while (!session.Complete) session.Submit(session.Expected);
+  Assert.Equal(16, session.Correct);
+  Assert.Equal(5, session.Answers.Count(a => a.Prompt.IsCongruent));
+  Assert.Equal(11, session.Answers.Count(a => !a.Prompt.IsCongruent));
+ }
+ [Fact] public void OneBackUsesThePreviousCardAfterItsAnchor()
+ {
+  var first = new Prompt(Pigment.Rose, Pigment.Blue);
+  var second = new Prompt(Pigment.Gold, Pigment.Green);
+  var session = new AttentionSession([first, second], AttentionRule.Ink, oneBack: true);
+  Assert.Equal(Pigment.Blue, session.Expected);
+  session.Submit(Pigment.Blue);
+  Assert.Equal(Pigment.Blue, session.Expected);
+  session.Submit(Pigment.Blue);
+  Assert.Equal(2, session.Correct);
+ }
+ [Fact] public void PreferencesPersistAndDeepModeExpandsTheDeck()
+ {
+  var store = new MemoryStore(); var game = new ParlourGame(store, new Random(42));
+  game.Customize(ParlourPalette.RoseVelvet, ParlourCompanion.Corgi, FocusDepth.Deep);
+  Assert.Equal(ParlourPalette.RoseVelvet, store.Value.Palette);
+  Assert.Equal(ParlourCompanion.Corgi, store.Value.Companion);
+  Assert.Equal(FocusDepth.Deep, store.Value.FocusDepth);
+  Assert.Equal(24, game.Start(AttentionRule.Word).Total);
+  Assert.Equal(36, game.Start(AttentionRule.Shift).Total);
  }
  [Fact] public void ShiftingSpotlightChangesRuleAndUsesEighteenTrials()
  {
@@ -37,7 +59,7 @@ public class GameTests
   while (!session.Complete)
   {
    var rule = session.CurrentRule; seenRules.Add(rule);
-   session.Submit(rule == AttentionRule.Ink ? session.Current!.Ink : session.Current!.Word);
+   session.Submit(session.Expected);
   }
   Assert.Contains(AttentionRule.Ink, seenRules);
   Assert.Contains(AttentionRule.Word, seenRules);
@@ -48,7 +70,7 @@ public class GameTests
   var store = new MemoryStore(); var game = new ParlourGame(store, new Random(1));
   var session = game.Start(AttentionRule.Ink);
   Assert.False(game.CollectRose());
-  while (!session.Complete) session.Submit((Pigment)(((int)session.Current!.Ink + 1) % 4));
+  while (!session.Complete) session.Submit((Pigment)(((int)session.Expected + 1) % 4));
   Assert.Equal(0, session.Correct);
   Assert.True(game.CollectRose()); Assert.False(game.CollectRose());
   Assert.Equal(1, store.Value.CompletedSessions);
@@ -57,7 +79,7 @@ public class GameTests
  {
   var store = new MemoryStore { Fail = true }; var game = new ParlourGame(store, new Random(2));
   var session = game.Start(AttentionRule.Word);
-  while (!session.Complete) session.Submit(session.Current!.Word);
+  while (!session.Complete) session.Submit(session.Expected);
   Assert.Throws<IOException>(() => game.CollectRose());
   Assert.Equal(0, game.Progress.CompletedSessions);
   store.Fail = false;
@@ -77,7 +99,7 @@ public class GameTests
  }
  [Fact] public void ProgressRoundTripsAndOverwritesAtomically()
  {
-  WithFile(path => { var store = new JsonProgressStore(path); Assert.Equal(0, store.Load().Roses); store.Save(new(2)); store.Save(new(7)); Assert.Equal(7, store.Load().CompletedSessions); Assert.Equal(3, store.Load().Roses); Assert.False(File.Exists(path + ".tmp")); });
+  WithFile(path => { var store = new JsonProgressStore(path); Assert.Equal(0, store.Load().Roses); store.Save(new(2)); store.Save(new(7, ParlourPalette.SageGlass, ParlourCompanion.Pug, FocusDepth.Deep)); var loaded = store.Load(); Assert.Equal(7, loaded.CompletedSessions); Assert.Equal(3, loaded.Roses); Assert.Equal(ParlourPalette.SageGlass, loaded.Palette); Assert.Equal(ParlourCompanion.Pug, loaded.Companion); Assert.Equal(FocusDepth.Deep, loaded.FocusDepth); Assert.False(File.Exists(path + ".tmp")); });
  }
  private static void WithFile(Action<string> action)
  {

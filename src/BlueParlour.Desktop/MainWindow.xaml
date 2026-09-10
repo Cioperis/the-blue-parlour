@@ -3,8 +3,8 @@
  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
  xmlns:local="clr-namespace:BlueParlour.Desktop"
  Icon="Assets/Parlour.ico" Title="The Blue Parlour" Width="1180" Height="800" MinWidth="820" MinHeight="600"
- Background="#142E45" Foreground="#233B50" WindowStartupLocation="CenterScreen" PreviewKeyDown="OnKeyDown">
- <Border Background="#142E45">
+ Background="{Binding Background}" Foreground="#233B50" WindowStartupLocation="CenterScreen" PreviewKeyDown="OnKeyDown">
+ <Border Background="{Binding Background}">
  <Viewbox Stretch="Uniform">
  <Grid Width="1140" Height="720" Margin="12">
   <Grid.RowDefinitions><RowDefinition Height="92"/><RowDefinition Height="*"/><RowDefinition Height="42"/></Grid.RowDefinitions>
@@ -13,16 +13,18 @@
     <TextBlock Text="THE BLUE PARLOUR" Foreground="#F2E4CD" FontFamily="Georgia" FontSize="30"/>
     <TextBlock Text="A LITTLE CURIOSITY. A LITTLE COLOUR. A MOMENT FOR YOURSELF." Foreground="#ADC5D7" FontSize="10" Margin="1,9,0,0"/>
    </StackPanel>
-   <Border HorizontalAlignment="Right" VerticalAlignment="Center" BorderBrush="#658299" BorderThickness="1" CornerRadius="20" Padding="18,9">
-    <TextBlock Text="{Binding Collection}" Foreground="#E2CFAB" FontSize="12"/>
-   </Border>
+   <StackPanel HorizontalAlignment="Right" VerticalAlignment="Center" Orientation="Horizontal">
+    <Border BorderBrush="#7890A0" BorderThickness="1" CornerRadius="20" Padding="15,8" Margin="0,0,9,0"><TextBlock Text="{Binding Collection}" Foreground="#F0DEC0" FontSize="11"/></Border>
+    <Button Command="{Binding StartCustomize}" Content="✦  Make it yours" Background="{Binding Accent}" Foreground="White" Padding="15,9"/>
+   </StackPanel>
   </Grid>
   <Grid Grid.Row="1">
    <Grid.ColumnDefinitions><ColumnDefinition Width="365"/><ColumnDefinition Width="20"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
-   <Border Background="#254B6A" CornerRadius="16" BorderBrush="#658299" BorderThickness="1">
+   <Border Background="{Binding SidePanel}" CornerRadius="22" BorderBrush="#7890A0" BorderThickness="1">
+    <Border.Effect><DropShadowEffect Color="#06131D" BlurRadius="24" ShadowDepth="8" Opacity="0.35"/></Border.Effect>
     <Grid Margin="22">
      <Grid.RowDefinitions><RowDefinition Height="40"/><RowDefinition Height="330"/><RowDefinition Height="*"/></Grid.RowDefinitions>
-     <TextBlock Text="YOUR QUIET CORNER" Foreground="#E2CFAB" FontSize="11" HorizontalAlignment="Center" Margin="0,8,0,0"/>
+     <TextBlock Text="{Binding CornerTitle}" Foreground="#E2CFAB" FontSize="11" HorizontalAlignment="Center" Margin="0,8,0,0"/>
      <Canvas Grid.Row="1" Width="318" Height="320" ClipToBounds="True">
       <!-- Original vector illustration: moonlit sash window, desk, sleeping cat. -->
       <Rectangle Width="220" Height="222" Canvas.Left="48" Canvas.Top="12" RadiusX="95" RadiusY="95" Fill="#A18E6D"/>
@@ -45,12 +47,30 @@
        <Ellipse Width="16" Height="15" Canvas.Left="62" Canvas.Top="201" Fill="#94364B"/>
       </Canvas>
       <Ellipse Width="123" Height="24" Canvas.Left="99" Canvas.Top="254" Fill="#782E48"/>
-      <Canvas Visibility="{Binding HasCat, Converter={StaticResource Visible}}">
+      <Canvas Visibility="{Binding IsCat, Converter={StaticResource Visible}}">
        <Ellipse Width="92" Height="47" Canvas.Left="116" Canvas.Top="218" Fill="#DFC9A4"/>
        <Path Data="M110,234 L110,203 L128,215 L148,211 L162,197 L165,237Z" Fill="#DFC9A4"/>
        <Ellipse Width="58" Height="42" Canvas.Left="108" Canvas.Top="216" Fill="#EAD7B5"/>
        <Path Data="M118,233 Q123,239 129,233 M142,233 Q147,239 153,233 M131,242 L137,245 L141,241" Stroke="#493D3B" StrokeThickness="2"/>
        <Path Data="M189,245 Q226,258 203,228" Stroke="#C0A580" StrokeThickness="12" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+      </Canvas>
+      <Canvas Visibility="{Binding IsPug, Converter={StaticResource Visible}}">
+       <Ellipse Width="105" Height="57" Canvas.Left="108" Canvas.Top="211" Fill="#C2A680"/>
+       <Ellipse Width="61" Height="52" Canvas.Left="105" Canvas.Top="207" Fill="#D3BA95"/>
+       <Ellipse Width="23" Height="31" Canvas.Left="105" Canvas.Top="203" Fill="#604A42"/>
+       <Ellipse Width="23" Height="31" Canvas.Left="149" Canvas.Top="203" Fill="#604A42"/>
+       <Ellipse Width="36" Height="29" Canvas.Left="118" Canvas.Top="226" Fill="#6A5047"/>
+       <Ellipse Width="5" Height="5" Canvas.Left="120" Canvas.Top="220" Fill="#26343C"/><Ellipse Width="5" Height="5" Canvas.Left="148" Canvas.Top="220" Fill="#26343C"/>
+       <Path Data="M129,241 Q136,248 144,241" Stroke="#F0D7B2" StrokeThickness="2"/>
+       <Path Data="M205,232 Q228,214 218,249" Stroke="#C2A680" StrokeThickness="10" StrokeStartLineCap="Round"/>
+      </Canvas>
+      <Canvas Visibility="{Binding IsCorgi, Converter={StaticResource Visible}}">
+       <Ellipse Width="112" Height="54" Canvas.Left="104" Canvas.Top="214" Fill="#D58A45"/>
+       <Path Data="M103,235 L109,191 L133,214 L161,209 L181,190 L178,247Z" Fill="#D58A45"/>
+       <Ellipse Width="62" Height="48" Canvas.Left="111" Canvas.Top="214" Fill="#F2D5A6"/>
+       <Ellipse Width="5" Height="5" Canvas.Left="122" Canvas.Top="224" Fill="#26343C"/><Ellipse Width="5" Height="5" Canvas.Left="156" Canvas.Top="224" Fill="#26343C"/>
+       <Path Data="M134,240 L142,246 L150,240" Stroke="#59413A" StrokeThickness="3"/>
+       <Path Data="M208,232 Q232,213 221,250" Stroke="#D58A45" StrokeThickness="11" StrokeStartLineCap="Round"/>
       </Canvas>
       <Canvas Visibility="{Binding HasPainting, Converter={StaticResource Visible}}">
        <Rectangle Width="48" Height="59" Canvas.Left="240" Canvas.Top="213" Fill="#C8AB74"/>
@@ -68,22 +88,56 @@
      </StackPanel>
     </Grid>
    </Border>
-   <Border Grid.Column="2" Background="#F5EFE3" CornerRadius="16" BorderBrush="#C5B89E" BorderThickness="1">
+   <Border Grid.Column="2" Background="{Binding Surface}" CornerRadius="22" BorderBrush="#C5B89E" BorderThickness="1">
+    <Border.Effect><DropShadowEffect Color="#06131D" BlurRadius="28" ShadowDepth="9" Opacity="0.3"/></Border.Effect>
     <Grid Margin="36,28">
      <StackPanel Visibility="{Binding IsHome, Converter={StaticResource Visible}}">
-      <TextBlock Text="MAKE A LITTLE ROOM FOR YOURSELF" FontSize="11" Foreground="#7B6546" Margin="0,0,0,12"/>
-      <TextBlock Text="An evening, unhurried." FontFamily="Georgia" FontSize="35"/>
-      <TextBlock Text="Choose a small ritual. You can stop whenever you like; there is no streak to keep or deadline to meet." FontSize="15" LineHeight="23" Margin="0,12,0,17"/>
-      <Button Command="{Binding StartOpera}" Background="#244F73" Foreground="#FFF7E9" Padding="16,14">
-       <StackPanel><TextBlock Text="The Midnight Opera" Foreground="#FFF7E9" FontFamily="Georgia" FontSize="24"/><TextBlock Text="Three acts · hidden pairs · memory and mastery" Foreground="#C8DAE4" Margin="0,6,0,0" FontSize="13"/></StackPanel>
-      </Button>
-      <Button Command="{Binding StartQuiet}" Margin="0,10,0,0" Padding="16,14">
-       <StackPanel><TextBlock Text="A quiet moment" FontFamily="Georgia" FontSize="23"/><TextBlock Text="Three optional pauses · no puzzle to solve" Margin="0,6,0,0" FontSize="13"/></StackPanel>
-      </Button>
-      <TextBlock Text="OR, A LITTLE CURIOSITY" FontSize="10" Foreground="#7B6546" Margin="0,19,0,10"/>
-      <UniformGrid Columns="3"><Button Command="{Binding StartInk}" Content="Follow ink" Margin="0,0,4,0"/><Button Command="{Binding StartWord}" Content="Follow word" Margin="4,0"/><Button Command="{Binding StartShift}" Content="Shifting spotlight" Margin="4,0,0,0" Background="#DDE9EC"/></UniformGrid>
-      <TextBlock Text="The original twelve-card attention games. Your keepsakes are still here." FontSize="12" Foreground="#6C746F" Margin="0,11,0,0"/>
+      <TextBlock Text="YOUR PARLOUR · YOUR PACE" FontSize="10" Foreground="#7B6546" Margin="0,0,0,9"/>
+      <TextBlock Text="What feels right tonight?" FontFamily="Georgia" FontSize="34"/>
+      <TextBlock Text="Choose a challenge or a pause. Every card is an invitation; leaving is always allowed." FontSize="14" LineHeight="22" Margin="0,8,0,14"/>
+      <UniformGrid Columns="2" Rows="2" Margin="-5">
+       <Button Command="{Binding StartOpera}" Background="{Binding Accent}" Foreground="#FFF7E9" Margin="5" Padding="17" Height="118" HorizontalContentAlignment="Left">
+        <StackPanel><TextBlock Text="◐  Midnight Opera" Foreground="#FFF7E9" FontFamily="Georgia" FontSize="21"/><TextBlock Text="3 acts · hidden pairs" Foreground="#D7E4E9" Margin="0,8,0,0"/><TextBlock Text="Memory + mastery" Foreground="#D7E4E9" FontSize="11" Margin="0,3,0,0"/></StackPanel>
+       </Button>
+       <Button Command="{Binding StartShift}" Background="{Binding AccentSoft}" Margin="5" Padding="17" Height="118" HorizontalContentAlignment="Left">
+        <StackPanel><TextBlock Text="↔  Shifting Spotlight" FontFamily="Georgia" FontSize="21"/><TextBlock Text="Rules change as you play" Margin="0,8,0,0"/><TextBlock Text="Inhibition + switching" FontSize="11" Foreground="#65747A" Margin="0,3,0,0"/></StackPanel>
+       </Button>
+       <Button Command="{Binding StartInk}" Margin="5" Padding="17" Height="105" HorizontalContentAlignment="Left">
+        <StackPanel><TextBlock Text="◉  Ink in memory" FontFamily="Georgia" FontSize="20"/><TextBlock Text="Answer from one card back" Margin="0,7,0,0"/><TextBlock Text="{Binding DepthName}" FontSize="11" Foreground="#65747A" Margin="0,3,0,0"/></StackPanel>
+       </Button>
+       <Button Command="{Binding StartWord}" Margin="5" Padding="17" Height="105" HorizontalContentAlignment="Left">
+        <StackPanel><TextBlock Text="Aa  Words in memory" FontFamily="Georgia" FontSize="20"/><TextBlock Text="Hold the previous word" Margin="0,7,0,0"/><TextBlock Text="{Binding DepthName}" FontSize="11" Foreground="#65747A" Margin="0,3,0,0"/></StackPanel>
+       </Button>
+      </UniformGrid>
+      <Button Command="{Binding StartQuiet}" Background="Transparent" BorderBrush="{Binding Accent}" Margin="0,10,0,0" Padding="13,10" HorizontalContentAlignment="Left"><DockPanel><TextBlock Text="→" DockPanel.Dock="Right" FontSize="18"/><TextBlock Text="A quiet moment · choose one of three reflection paths" FontSize="13"/></DockPanel></Button>
      </StackPanel>
+     <Grid Visibility="{Binding IsCustomize, Converter={StaticResource Visible}}">
+      <Grid.RowDefinitions><RowDefinition Height="38"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+      <Button Content="← Done" Command="{Binding Home}" Padding="10,5" HorizontalAlignment="Right"/>
+      <StackPanel Grid.Row="1" Margin="8,12,8,0">
+       <TextBlock Text="MAKE IT YOURS" FontSize="10" Foreground="#7B6546"/>
+       <TextBlock Text="A room that answers to you." FontFamily="Georgia" FontSize="31" Margin="0,8,0,6"/>
+       <TextBlock Text="Change anything as often as you like. Choices save immediately." FontSize="13" Foreground="#65747A" Margin="0,0,0,18"/>
+       <TextBlock Text="ATMOSPHERE" FontSize="10" Foreground="#7B6546" Margin="0,0,0,7"/>
+       <UniformGrid Columns="3">
+        <Button Content="Midnight blue" Command="{Binding SetPalette}" CommandParameter="Midnight" Background="#173B59" Foreground="White" Margin="0,0,5,0"/>
+        <Button Content="Rose velvet" Command="{Binding SetPalette}" CommandParameter="RoseVelvet" Background="#71364D" Foreground="White" Margin="5,0"/>
+        <Button Content="Sage glass" Command="{Binding SetPalette}" CommandParameter="SageGlass" Background="#446E65" Foreground="White" Margin="5,0,0,0"/>
+       </UniformGrid>
+       <TextBlock Text="COMPANION" FontSize="10" Foreground="#7B6546" Margin="0,20,0,7"/>
+       <UniformGrid Columns="3">
+        <Button Content="Cat" Command="{Binding SetCompanion}" CommandParameter="Cat" Margin="0,0,5,0"/>
+        <Button Content="Pug" Command="{Binding SetCompanion}" CommandParameter="Pug" Margin="5,0"/>
+        <Button Content="Corgi" Command="{Binding SetCompanion}" CommandParameter="Corgi" Margin="5,0,0,0"/>
+       </UniformGrid>
+       <TextBlock Text="FOCUS DEPTH" FontSize="10" Foreground="#7B6546" Margin="0,20,0,7"/>
+       <UniformGrid Columns="2">
+        <Button Command="{Binding SetDepth}" CommandParameter="Focused" Margin="0,0,5,0" HorizontalContentAlignment="Left"><StackPanel><TextBlock Text="Focused" FontFamily="Georgia" FontSize="18"/><TextBlock Text="16 one-back · 18 shifting" FontSize="11"/></StackPanel></Button>
+        <Button Command="{Binding SetDepth}" CommandParameter="Deep" Margin="5,0,0,0" HorizontalContentAlignment="Left"><StackPanel><TextBlock Text="Deep" FontFamily="Georgia" FontSize="18"/><TextBlock Text="24 one-back · 36 shifting" FontSize="11"/></StackPanel></Button>
+       </UniformGrid>
+       <Border Background="{Binding AccentSoft}" CornerRadius="12" Padding="15" Margin="0,20,0,0"><StackPanel><TextBlock Text="CURRENT ROOM" FontSize="9" Foreground="#65747A"/><TextBlock FontFamily="Georgia" FontSize="18" Margin="0,5,0,0"><Run Text="{Binding PaletteName, Mode=OneWay}"/><Run Text="  ·  "/><Run Text="{Binding CompanionName, Mode=OneWay}"/><Run Text="  ·  "/><Run Text="{Binding DepthName, Mode=OneWay}"/></TextBlock><TextBlock Text="{Binding Message}" FontSize="11" Margin="0,6,0,0"/></StackPanel></Border>
+      </StackPanel>
+     </Grid>
      <Grid Visibility="{Binding IsOpera, Converter={StaticResource Visible}}">
       <Grid.RowDefinitions><RowDefinition Height="32"/><RowDefinition Height="*"/></Grid.RowDefinitions>
       <Button Content="← Back to the parlour" Command="{Binding Home}" Padding="8,4" HorizontalAlignment="Right" FontSize="11"/>
@@ -94,11 +148,22 @@
       <Button Content="← Back to the parlour" Command="{Binding Home}" Padding="8,4" HorizontalAlignment="Right" FontSize="11"/>
       <StackPanel Grid.Row="1" DataContext="{Binding Quiet}" Margin="10,24,10,0">
        <TextBlock Text="{Binding Counter}" FontSize="11" Foreground="#7B6546"/>
-       <TextBlock Text="{Binding Title}" FontFamily="Georgia" FontSize="33" Margin="0,16,0,25"/>
-       <Border Background="#DFE9E9" CornerRadius="16" Padding="26" MinHeight="180"><TextBlock Text="{Binding Prompt}" FontSize="21" LineHeight="33" VerticalAlignment="Center"/></Border>
-       <TextBlock Text="These invitations are optional. Skip anything that does not feel comfortable." FontSize="13" Foreground="#6C746F" LineHeight="21" Margin="0,22,0,18"/>
-       <Button Content="Continue, or skip this moment  →" Command="{Binding Next}" Visibility="{Binding NotComplete, Converter={StaticResource Visible}}" HorizontalAlignment="Left" Background="#244F73" Foreground="White"/>
-       <Button Content="Begin again, if you like  ↻" Command="{Binding Restart}" Visibility="{Binding Complete, Converter={StaticResource Visible}}" HorizontalAlignment="Left"/>
+       <TextBlock Text="{Binding Title}" FontFamily="Georgia" FontSize="33" Margin="0,12,0,18"/>
+       <StackPanel Visibility="{Binding IsChoosing, Converter={StaticResource Visible}}">
+        <TextBlock Text="There is no prescribed route. Pick what seems useful now; you can return and choose differently." FontSize="14" LineHeight="22" Margin="0,0,0,14"/>
+        <Button Command="{Binding ChoosePath}" CommandParameter="Notice" HorizontalContentAlignment="Left" Padding="18,14" Margin="0,0,0,8"><StackPanel><TextBlock Text="01  Notice the room" FontFamily="Georgia" FontSize="20"/><TextBlock Text="Colours, support, texture and sound" FontSize="12" Margin="0,4,0,0"/></StackPanel></Button>
+        <Button Command="{Binding ChoosePath}" CommandParameter="GentleVoice" HorizontalContentAlignment="Left" Padding="18,14" Margin="0,0,0,8"><StackPanel><TextBlock Text="02  A gentler voice" FontFamily="Georgia" FontSize="20"/><TextBlock Text="Effort, perspective and a sentence worth keeping" FontSize="12" Margin="0,4,0,0"/></StackPanel></Button>
+        <Button Command="{Binding ChoosePath}" CommandParameter="OpenEnding" HorizontalContentAlignment="Left" Padding="18,14"><StackPanel><TextBlock Text="03  Leave an ending open" FontFamily="Georgia" FontSize="20"/><TextBlock Text="One useful step; one question allowed to wait" FontSize="12" Margin="0,4,0,0"/></StackPanel></Button>
+       </StackPanel>
+       <StackPanel Visibility="{Binding IsMoment, Converter={StaticResource Visible}}">
+        <Border Background="#DFE9E9" CornerRadius="18" Padding="28" MinHeight="182"><TextBlock Text="{Binding Prompt}" FontSize="20" LineHeight="31" VerticalAlignment="Center"/></Border>
+        <TextBlock Text="Nothing is recorded. Keep, skip, or leave any invitation." FontSize="12" Foreground="#6C746F" Margin="0,17,0,12"/>
+        <StackPanel Orientation="Horizontal">
+         <Button Content="Continue or skip  →" Command="{Binding Next}" Visibility="{Binding NotComplete, Converter={StaticResource Visible}}" Background="#244F73" Foreground="White" Margin="0,0,8,0"/>
+         <Button Content="Begin this path again  ↻" Command="{Binding Restart}" Visibility="{Binding Complete, Converter={StaticResource Visible}}" Margin="0,0,8,0"/>
+         <Button Content="Choose another path" Command="{Binding BackToPaths}"/>
+        </StackPanel>
+       </StackPanel>
       </StackPanel>
      </Grid>
      <Grid Visibility="{Binding IsPlaying, Converter={StaticResource Visible}}">
@@ -137,7 +202,7 @@
     </Grid>
    </Border>
   </Grid>
-  <TextBlock Grid.Row="2" Text="AN EDUCATIONAL PLAYTHING, NOT A CLINICAL TEST.                         v0.3 · THE BLUE PARLOUR" Foreground="#AFC1CD" FontSize="10" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+  <TextBlock Grid.Row="2" Text="AN EDUCATIONAL PLAYTHING, NOT A CLINICAL TEST.                         v0.4 · THE BLUE PARLOUR" Foreground="#AFC1CD" FontSize="10" VerticalAlignment="Center" HorizontalAlignment="Center"/>
  </Grid>
  </Viewbox>
  </Border>

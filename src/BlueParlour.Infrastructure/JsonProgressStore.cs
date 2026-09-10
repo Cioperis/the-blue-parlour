@@ -11,7 +11,9 @@ public sealed class JsonProgressStore(string path) : IProgressStore
         {
             if (!File.Exists(path)) return new();
             var progress = JsonSerializer.Deserialize<Progress>(File.ReadAllText(path));
-            return progress is { CompletedSessions: >= 0 and <= 1_000_000 } ? progress : new();
+            return progress is { CompletedSessions: >= 0 and <= 1_000_000 } &&
+                   Enum.IsDefined(progress.Palette) && Enum.IsDefined(progress.Companion) && Enum.IsDefined(progress.FocusDepth)
+                ? progress : new();
         }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException or JsonException)
         {

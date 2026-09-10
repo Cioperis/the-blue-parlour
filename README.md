@@ -1,27 +1,28 @@
 # The Blue Parlour
 
-A small, offline Windows game for an unhurried challenge: a three-act opera memory puzzle, optional quiet moments, and attention-switching cards. Blue, burgundy roses, and a sleeping cat. No accounts, timers, ads, telemetry, or purchases.
+A small, offline Windows game for an unhurried challenge: a three-act opera memory puzzle, optional quiet moments, and attention-switching cards in a parlour the player can personalize. No accounts, timers, ads, telemetry, or purchases.
 
-## New in v0.3.0
+## New in v0.4.0
 
-- **Midnight Opera is now a three-act memory game.** Act I has four hidden pairs, Act II five, and Act III six. Reveal two cards at a time; mismatches remain visible until you lower the curtain, so you control the pace. Completed pairs stay lit and fixed in place.
-- Each act counts pair attempts and offers an optional mastery target. There is no countdown or fail state. An encore reshuffles all three acts.
-- The deck now includes six original motifs: mask, rose, candle, key, music and moon.
-- **Shifting Spotlight** adds an 18-card executive-attention challenge. The cue switches between naming ink and reading the word, with mostly conflicting stimuli. The current rule is always explicit.
-- The quiet-moment activity, fixed-rule attention modes, game icon and existing saved keepsakes remain available.
-- CI now uses current Node 24-based GitHub actions.
+- **Make it yours** lets the player switch among midnight blue, rose velvet and sage glass palettes; choose a cat, pug or corgi companion; and select Focused or Deep challenge depth. Choices save immediately.
+- **Ink in memory** and **Words in memory** are now one-back challenges. The first card is an anchor; every later answer comes from the previous card while the current card supplies interference. Focused has 16 cards and Deep has 24.
+- **Shifting Spotlight** remains an explicit ink-or-word switching challenge and expands from 18 cards in Focused mode to 36 in Deep mode.
+- **A quiet moment** now offers three replayable paths. The player chooses the route, can return to the chooser at any time, and never types or saves a response.
+- The interface has a clearer dashboard, larger cards, softer depth, persistent palette accents, and room artwork that changes with the selected companion.
+- Midnight Opera retains its three acts, mastery targets, deliberate mismatch curtain, and reshuffled encore.
 
-The opera interlude uses original geometric art and text inspired by the Phantom atmosphere. It contains no music, lyrics, recordings, or artwork from a stage or film production. It is silent. The optional pauses are general relaxation invitations, not a treatment or assessment of stress or uncertainty.
+The opera interlude uses original geometric art and text inspired by the Phantom atmosphere. It contains no music, lyrics, recordings, or artwork from a stage or film production. It is silent. The optional pauses are general reflection prompts, not treatment or assessment.
 
 ## Play
 
 Download `TheBlueParlour-win-x64.zip` from **Releases** (or a successful **Actions** run), extract it, and double-click `TheBlueParlour.exe`. The .NET runtime is bundled. Windows x64 is the supported target. This prototype is unsigned, so Windows may show a publisher warning. Signing is a future distribution step.
 
 - **The Midnight Opera:** reveal hidden cards using the mouse or Tab and Space. Complete three increasingly difficult acts, then try an encore.
-- **A quiet moment:** take or skip three invitations at your own pace. Escape returns home.
-- **Shifting Spotlight:** follow the rule shown above each card; it changes between ink and word across 18 trials.
-- **Follow the ink:** choose the ink colour, ignoring the word.
-- **Follow the word:** choose the written word, ignoring its ink.
+- **A quiet moment:** choose one of three short reflection paths, move at your own pace, or return and choose differently. Escape returns home.
+- **Shifting Spotlight:** follow the rule shown above each card; it changes between ink and word across 18 or 36 trials.
+- **Ink in memory:** choose the ink colour from the previous card while looking at the current card.
+- **Words in memory:** choose the word from the previous card while looking at the current card.
+- **Make it yours:** choose a room palette, companion and challenge depth. Preferences save immediately.
 - Click a paint or press **1–4**. Press **Enter** for the next card after feedback. Tab and Space also work.
 - Finish a sitting to earn a keepsake regardless of accuracy: rose → cat → painting. Continue playing after collecting all three.
 - Leaving a sitting abandons that sitting. Completed keepsakes are saved automatically to `%LOCALAPPDATA%/TheBlueParlour/progress.json`.
@@ -50,14 +51,14 @@ Desktop ───────> Application ───────> Domain
 | Project | Responsibility | Start here |
 |---|---|---|
 | Domain | Prompts, answers, selected rule, scoring and completion | `AttentionSession.cs` |
-| Application | Balanced deck generation, session lifecycle, once-only keepsakes, storage port | `ParlourGame.cs` |
-| Infrastructure | JSON save loading, validation and atomic replacement | `JsonProgressStore.cs` |
+| Application | Deck generation, challenge depth, preferences, session lifecycle, once-only keepsakes, storage port | `ParlourGame.cs` |
+| Infrastructure | JSON save loading, preference validation and atomic replacement | `JsonProgressStore.cs` |
 | Desktop | Composition root, MVVM, commands, keyboard input, original vector room | `App.xaml.cs`, `MainViewModel.cs`, `MainWindow.xaml` |
 | Tests | Rule behavior, balance, rewards, save recovery | `GameTests.cs` |
 
-An answer moves from a WPF command → view model → domain session. The application awards a keepsake only after completion and persists it through `IProgressStore`. `OperaSession` owns concealed-card state, mismatch resolution, turns, pair selection and completion independently of WPF. `OperaViewModel` progresses the three acts, computes mastery targets and shuffles replay decks; `QuietViewModel` owns the optional pause sequence. `AttentionSession` resolves a per-card rule in shifting mode. The domain knows nothing about WPF or disk. The view model owns transient presentation states, including feedback and result screens. Dependency injection is explicit in the composition root; no service locator, mediator or container is needed here.
+An answer moves from a WPF command → view model → domain session. The application awards a keepsake only after completion and persists it through `IProgressStore`. The same port saves palette, companion and challenge-depth choices. `OperaSession` owns concealed-card state, mismatch resolution, turns, pair selection and completion independently of WPF. `OperaViewModel` progresses the three acts, computes mastery targets and shuffles replay decks; `QuietViewModel` owns its path chooser and optional prompts. `AttentionSession` owns one-back expectations and resolves a per-card rule in shifting mode. The domain knows nothing about WPF or disk. The view model owns transient presentation states, including feedback and result screens. Dependency injection is explicit in the composition root; no service locator, mediator or container is needed here.
 
-`--smoke-test <output-folder>` runs deterministic attention sittings against in-memory storage, completes shifting mode and all three opera acts, exercises a mismatch and encore, checks quiet-moment navigation and the window icon, and renders ten offscreen WPF screenshots. CI runs this against the **published executable**, so startup and bundling are checked as well as the domain tests. It never reads or changes the player's save. It is not a substitute for a manual keyboard/mouse check on the recipient's PC.
+`--smoke-test <output-folder>` runs deterministic one-back sittings against in-memory storage, completes shifting mode and all three opera acts, exercises a mismatch and encore, checks reflection-path navigation, customization and the window icon, and renders fourteen offscreen WPF screenshots. CI runs this against the **published executable**, so startup and bundling are checked as well as the domain tests. It never reads or changes the player's save. It is not a substitute for a manual keyboard/mouse check on the recipient's PC.
 
 ## GitHub Actions
 
@@ -66,13 +67,13 @@ Every main-branch push and pull request builds, tests, publishes a self-containe
 Pushing a `v*` tag runs the same verification and then creates a GitHub Release with the ZIP. Only the release job receives `contents: write`; build jobs are read-only. No personal access token or custom secret is needed. Releases inherit this repository's private visibility. To give the game to someone without repository access, send them the downloaded ZIP.
 
 ```powershell
-git tag v0.3.0
-git push origin v0.3.0
+git tag v0.4.0
+git push origin v0.4.0
 ```
 
 ## Educational basis and limits
 
-The colour-naming mode is inspired by the **Stroop effect**: ink naming commonly takes longer when a colour word and its ink conflict. Fixed-rule sittings contain six matching and six conflicting cards. Shifting Spotlight contains 18 cards and adds explicit rule switching; it is a game mechanic rather than a validated cognitive task.
+The colour-naming mode is inspired by the **Stroop effect**: ink naming commonly takes longer when a colour word and its ink conflict. The fixed-rule modes add a one-back working-memory mechanic and use mostly conflicting cards: 5 matching plus 11 conflicting in Focused mode, or 8 plus 16 in Deep mode. Shifting Spotlight contains 18 or 36 cards and adds explicit rule switching. These are game mechanics rather than validated cognitive tasks.
 
 There is no response-time measurement, normative comparison, diagnostic scoring, or claim of therapeutic benefit. Accuracy counts are game feedback only; they do not demonstrate an individual's Stroop effect or assess attention, intelligence, mental health, or clinical competence. Content is original and paraphrased; no test instrument or APA artwork is reproduced.
 
@@ -82,4 +83,4 @@ There is no response-time measurement, normative comparison, diagnostic scoring,
 
 ## Next useful increments
 
-More varied psychology-inspired mechanics, optional sound, richer illustration, independent colour-accessible puzzles, signed distribution, and .NET 10 migration. The present colour task inherently requires colour discrimination; labels support the answer controls but cannot remove that dependency from the stimulus.
+Optional sound, richer illustration, independent colour-accessible puzzles, signed distribution, and .NET 10 migration. The present colour task inherently requires colour discrimination; labels support the answer controls but cannot remove that dependency from the stimulus.
