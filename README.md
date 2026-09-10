@@ -1,11 +1,22 @@
 # The Blue Parlour
 
-A small, offline Windows game about attention: twelve paint cards, a moonlit vintage parlour, and a few keepsakes to collect. Blue, burgundy roses, and a sleeping cat. No accounts, timers, ads, telemetry, or purchases.
+A small, offline Windows game for an unhurried break: a visible opera matching puzzle, optional quiet moments, and the original attention cards. Blue, burgundy roses, and a sleeping cat. No accounts, timers, ads, telemetry, or purchases.
+
+## New in v0.2.0
+
+- **The Midnight Opera:** match three visible pairs of original masks, roses and candles to light a miniature theatre. Six clicks can complete a scene. Cards reshuffle on replay, with three possible closing messages. All cards remain visible; a mismatch simply clears the selection, without undoing completed pairs. Clicking the selected card lets you change your mind.
+- **A quiet moment:** three optional, untimed prompts about noticing your surroundings, comfortable breathing, and one small next step. Continue also skips a prompt. There are no required breathing counts, holds, personal entries, or ratings.
+- Original cat-and-rose Windows icon, embedded in the EXE and window; seven sizes from 16 to 256 pixels. Regenerate it on Windows with `scripts/create-icon.ps1`.
+- A calmer front page and Escape to return to the parlour from any activity. The new activities need no unlock and have no streak, score, timer, or saved completion requirement.
+
+The opera interlude uses original geometric art and text inspired by the Phantom atmosphere. It contains no music, lyrics, recordings, or artwork from a stage or film production. It is silent. The optional pauses are general relaxation invitations, not a treatment or assessment of stress or uncertainty.
 
 ## Play
 
 Download `TheBlueParlour-win-x64.zip` from **Releases** (or a successful **Actions** run), extract it, and double-click `TheBlueParlour.exe`. The .NET runtime is bundled. Windows x64 is the supported target. This prototype is unsigned, so Windows may show a publisher warning. Signing is a future distribution step.
 
+- **The Midnight Opera:** choose matching pictures using the mouse or Tab and Space. Match three pairs, then replay or leave.
+- **A quiet moment:** take or skip three invitations at your own pace. Escape returns home.
 - **Follow the ink:** choose the ink colour, ignoring the word.
 - **Follow the word:** choose the written word, ignoring its ink.
 - Click a paint or press **1–4**. Press **Enter** for the next card after feedback. Tab and Space also work.
@@ -41,9 +52,9 @@ Desktop ───────> Application ───────> Domain
 | Desktop | Composition root, MVVM, commands, keyboard input, original vector room | `App.xaml.cs`, `MainViewModel.cs`, `MainWindow.xaml` |
 | Tests | Rule behavior, balance, rewards, save recovery | `GameTests.cs` |
 
-An answer moves from a WPF command → view model → domain session. The application awards a keepsake only after completion and persists it through `IProgressStore`. The domain knows nothing about WPF or disk. The view model owns transient presentation states, including feedback and result screens. Dependency injection is explicit in the composition root; no service locator, mediator or container is needed here.
+An answer moves from a WPF command → view model → domain session. The application awards a keepsake only after completion and persists it through `IProgressStore`. `OperaSession` owns pair selection and completion independently of WPF. `OperaViewModel` projects card state and shuffles replay decks; `QuietViewModel` owns the optional pause sequence. The domain knows nothing about WPF or disk. The view model owns transient presentation states, including feedback and result screens. Dependency injection is explicit in the composition root; no service locator, mediator or container is needed here.
 
-`--smoke-test <output-folder>` runs three deterministic sittings against in-memory storage, checks input gating and progression, and renders five offscreen WPF screenshots. CI runs this against the **published executable**, so startup and bundling are checked as well as the domain tests. It never reads or changes the player's save. It is not a substitute for a manual keyboard/mouse check on the recipient's PC.
+`--smoke-test <output-folder>` runs three deterministic sittings against in-memory storage, checks input gating and progression, also completes five opera replays and quiet-moment navigation, checks the window icon, and renders ten offscreen WPF screenshots. CI runs this against the **published executable**, so startup and bundling are checked as well as the domain tests. It never reads or changes the player's save. It is not a substitute for a manual keyboard/mouse check on the recipient's PC.
 
 ## GitHub Actions
 
@@ -63,6 +74,7 @@ The colour-naming mode is inspired by the **Stroop effect**: ink naming commonly
 There is no response-time measurement, normative comparison, diagnostic scoring, or claim of therapeutic benefit. Accuracy counts are game feedback only; they do not demonstrate an individual's Stroop effect or assess attention, intelligence, mental health, or clinical competence. Content is original and paraphrased; no test instrument or APA artwork is reproduced.
 
 - [APA: Color text task](https://www.apa.org/research-practice/conduct-research/infographic-color-text)
+- [NHS: Breathing exercises for stress](https://www.nhs.uk/mental-health/self-help/guides-tools-and-activities/breathing-exercises-for-stress/) — background for the invitation to breathe comfortably without forcing; this game does not reproduce or prescribe the full exercise.
 - [Microsoft: Single-file deployment](https://learn.microsoft.com/en-us/dotnet/core/deploying/single-file/overview)
 
 ## Next useful increments

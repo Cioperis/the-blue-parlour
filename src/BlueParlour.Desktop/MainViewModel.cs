@@ -18,16 +18,21 @@ public sealed class MainViewModel : INotifyPropertyChanged
 {
     private readonly ParlourGame game;
     private bool playing, feedback, summary;
+    private bool opera, quiet;
     private Prompt? shown;
     private string message = "Choose a small ritual. There is no timer, and every finished sitting earns a rose.";
     public MainViewModel(ParlourGame game)
     {
         this.game = game;
+        Opera = new(Random.Shared);
+        Quiet = new();
+        StartOpera = new(_ => { ClearScreens(); opera = true; Opera.Start(); Refresh(); });
+        StartQuiet = new(_ => { ClearScreens(); quiet = true; Quiet.Start(); Refresh(); });
         StartInk = new(_ => Start(AttentionRule.Ink));
         StartWord = new(_ => Start(AttentionRule.Word));
         Answer = new(p => Respond(Enum.Parse<Pigment>((string)p!)), () => playing && !feedback);
         Next = new(_ => Advance(), () => feedback);
-        Home = new(_ => { playing = feedback = summary = false; message = "The kettle is on. Stay a little longer."; Refresh(); });
+        Home = new(_ => { ClearScreens(); message = "The kettle is on. Stay a little longer."; Refresh(); });
         RetrySave = new(_ => SaveReward());
     }
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -37,7 +42,13 @@ public sealed class MainViewModel : INotifyPropertyChanged
     public RelayCommand Next { get; }
     public RelayCommand Home { get; }
     public RelayCommand RetrySave { get; }
-    public bool IsHome => !playing && !summary;
+    public OperaViewModel Opera { get; }
+    public QuietViewModel Quiet { get; }
+    public RelayCommand StartOpera { get; }
+    public RelayCommand StartQuiet { get; }
+    public bool IsOpera => opera;
+    public bool IsQuiet => quiet;
+    public bool IsHome => !playing && !summary && !opera && !quiet;
     public bool IsPlaying => playing;
     public bool IsSummary => summary;
     public bool HasFeedback => feedback;
@@ -65,11 +76,13 @@ public sealed class MainViewModel : INotifyPropertyChanged
     }
     private void Start(AttentionRule rule)
     {
+        ClearScreens();
         shown = game.Start(rule).Current;
         playing = true; feedback = summary = SaveFailed = false;
         message = "Take your time. Select a paint below, or use keys 1–4.";
         Refresh();
     }
+    private void ClearScreens() => playing = feedback = summary = opera = quiet = false;
     private void Respond(Pigment choice)
     {
         var result = game.Session!.Submit(choice);

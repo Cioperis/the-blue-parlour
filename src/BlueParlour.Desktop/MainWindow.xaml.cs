@@ -8,6 +8,7 @@ public partial class MainWindow : Window
     private void OnKeyDown(object sender, KeyEventArgs e)
     {
         if (DataContext is not MainViewModel vm || e.IsRepeat) return;
+        if (e.Key == Key.Escape && !vm.IsHome) { vm.Home.Execute(null); e.Handled = true; return; }
         var pigment = e.Key switch
         {
             Key.D1 or Key.NumPad1 => "Blue", Key.D2 or Key.NumPad2 => "Rose",

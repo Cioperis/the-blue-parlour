@@ -34,10 +34,34 @@ internal static class SmokeTest
         Capture(window, output, "summary");
         vm.Home.Execute(null);
         Capture(window, output, "collected");
+        vm.StartOpera.Execute(null);
+        if (!vm.IsOpera || vm.IsHome || vm.Answer.CanExecute("Blue")) throw new InvalidOperationException("Opera navigation failed.");
+        Capture(window, output, "opera");
+        for (var replay = 0; replay < 5; replay++)
+        {
+            foreach (var pair in vm.Opera.Cards.GroupBy(card => card.Motif))
+                foreach (var card in pair) card.Choose.Execute(null);
+            if (!vm.Opera.Complete) throw new InvalidOperationException("Opera completion failed.");
+            if (replay == 0) Capture(window, output, "opera-complete");
+            vm.Opera.Replay.Execute(null);
+            if (vm.Opera.Complete) throw new InvalidOperationException("Opera replay did not reset.");
+        }
+        vm.Home.Execute(null);
+        vm.StartQuiet.Execute(null);
+        Capture(window, output, "quiet");
+        for (var i = 0; i < 3; i++) vm.Quiet.Next.Execute(null);
+        if (!vm.Quiet.Complete || vm.Quiet.Next.CanExecute(null)) throw new InvalidOperationException("Quiet moment completion failed.");
+        Capture(window, output, "quiet-complete");
+        vm.Quiet.Restart.Execute(null);
+        if (vm.Quiet.Complete) throw new InvalidOperationException("Quiet moment reset failed.");
+        if (window.Icon is null) throw new InvalidOperationException("Window icon is missing.");
+        vm.Home.Execute(null);
         // Verify scaled window layout at minimum size.
         window.Width = 820; window.Height = 600;
         Capture(window, output, "small");
-        File.WriteAllText(Path.Combine(output, "success.txt"), "Three sittings, input gating, rewards, and five WPF renders passed.");
+        vm.StartOpera.Execute(null);
+        Capture(window, output, "opera-small");
+        File.WriteAllText(Path.Combine(output, "success.txt"), "Attention sittings, five opera replays, quiet moments, icon, input gating, and ten WPF renders passed.");
         window.Close();
     }
     private static void Capture(MainWindow window, string output, string name)

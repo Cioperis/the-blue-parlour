@@ -4,10 +4,12 @@
     <OutputType>WinExe</OutputType>
     <UseWPF>true</UseWPF>
     <AssemblyName>TheBlueParlour</AssemblyName>
-    <Version>0.1.0</Version>
+    <Version>0.2.0</Version>
+    <ApplicationIcon>Assets/Parlour.ico</ApplicationIcon>
     <Description>A cozy little exploration of attention.</Description>
   </PropertyGroup>
   <ItemGroup>
+    <Resource Include="Assets/Parlour.ico" />
     <ProjectReference Include="../BlueParlour.Application/BlueParlour.Application.csproj" />
     <ProjectReference Include="../BlueParlour.Infrastructure/BlueParlour.Infrastructure.csproj" />
   </ItemGroup>
