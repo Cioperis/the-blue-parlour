@@ -21,6 +21,7 @@ public sealed class ParlourGame(IProgressStore store, Random random)
 
     public AttentionSession Start(AttentionRule rule)
     {
+        if (rule == AttentionRule.Shift) return StartShiftingSpotlight();
         // Equal matching/conflicting trials; shuffle via injected RNG for repeatable tests.
         var prompts = Enumerable.Range(0, 12).Select(i =>
         {
@@ -30,6 +31,26 @@ public sealed class ParlourGame(IProgressStore store, Random random)
         }).ToArray();
         random.Shuffle(prompts);
         return Session = new AttentionSession(prompts, rule);
+    }
+
+    private AttentionSession StartShiftingSpotlight()
+    {
+        var rules = new[]
+        {
+            AttentionRule.Ink, AttentionRule.Ink, AttentionRule.Word,
+            AttentionRule.Word, AttentionRule.Ink, AttentionRule.Word,
+            AttentionRule.Ink, AttentionRule.Ink, AttentionRule.Word,
+            AttentionRule.Ink, AttentionRule.Word, AttentionRule.Word,
+            AttentionRule.Ink, AttentionRule.Word, AttentionRule.Ink,
+            AttentionRule.Word, AttentionRule.Word, AttentionRule.Ink
+        };
+        var prompts = rules.Select((rule, index) =>
+        {
+            var ink = (Pigment)random.Next(4);
+            var word = index % 3 == 0 ? ink : (Pigment)(((int)ink + random.Next(1, 4)) % 4);
+            return new Prompt(word, ink, rule);
+        }).ToArray();
+        return Session = new AttentionSession(prompts, AttentionRule.Shift);
     }
 
     public bool CollectRose()

@@ -11,8 +11,8 @@ jobs:
   windows:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: '8.0.x'
       - run: dotnet restore BlueParlour.sln
@@ -33,13 +33,13 @@ jobs:
         run: |
           Compress-Archive artifacts/win-x64/TheBlueParlour.exe artifacts/TheBlueParlour-win-x64.zip
           (Get-FileHash artifacts/TheBlueParlour-win-x64.zip -Algorithm SHA256).Hash + '  TheBlueParlour-win-x64.zip' | Set-Content artifacts/SHA256SUMS.txt
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: TheBlueParlour-win-x64
           path: |
             artifacts/TheBlueParlour-win-x64.zip
             artifacts/SHA256SUMS.txt
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         if: always()
         with:
           name: verification
@@ -53,7 +53,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v7
         with:
           name: TheBlueParlour-win-x64
           path: release

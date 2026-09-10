@@ -1,8 +1,8 @@
 namespace BlueParlour.Domain;
 
 public enum Pigment { Blue, Rose, Green, Gold }
-public enum AttentionRule { Ink, Word }
-public sealed record Prompt(Pigment Word, Pigment Ink)
+public enum AttentionRule { Ink, Word, Shift }
+public sealed record Prompt(Pigment Word, Pigment Ink, AttentionRule Rule = AttentionRule.Ink)
 {
     public bool IsCongruent => Word == Ink;
 }
@@ -17,7 +17,7 @@ public sealed class AttentionSession
     {
         this.prompts = prompts.ToArray();
         if (this.prompts.Length == 0) throw new ArgumentException("A session needs prompts.", nameof(prompts));
-        if (!Enum.IsDefined(rule) || this.prompts.Any(p => !Enum.IsDefined(p.Ink) || !Enum.IsDefined(p.Word)))
+        if (!Enum.IsDefined(rule) || this.prompts.Any(p => !Enum.IsDefined(p.Ink) || !Enum.IsDefined(p.Word) || p.Rule == AttentionRule.Shift))
             throw new ArgumentException("Unknown rule or pigment.");
         Rule = rule;
     }
@@ -26,13 +26,14 @@ public sealed class AttentionSession
     public int Answered => answers.Count;
     public bool Complete => Answered == Total;
     public Prompt? Current => Complete ? null : prompts[Answered];
+    public AttentionRule CurrentRule => Rule == AttentionRule.Shift ? Current?.Rule ?? AttentionRule.Ink : Rule;
     public IReadOnlyList<Answer> Answers => answers.AsReadOnly();
     public int Correct => answers.Count(a => a.Correct);
     public Answer Submit(Pigment choice)
     {
         if (!Enum.IsDefined(choice)) throw new ArgumentOutOfRangeException(nameof(choice));
         var prompt = Current ?? throw new InvalidOperationException("Session is complete.");
-        var expected = Rule == AttentionRule.Ink ? prompt.Ink : prompt.Word;
+        var expected = CurrentRule == AttentionRule.Ink ? prompt.Ink : prompt.Word;
         var answer = new Answer(prompt, choice, choice == expected);
         answers.Add(answer);
         return answer;

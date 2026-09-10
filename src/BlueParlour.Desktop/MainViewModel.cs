@@ -26,10 +26,11 @@ public sealed class MainViewModel : INotifyPropertyChanged
         this.game = game;
         Opera = new(Random.Shared);
         Quiet = new();
-        StartOpera = new(_ => { ClearScreens(); opera = true; Opera.Start(); Refresh(); });
+        StartOpera = new(_ => { ClearScreens(); opera = true; Opera.Replay.Execute(null); Refresh(); });
         StartQuiet = new(_ => { ClearScreens(); quiet = true; Quiet.Start(); Refresh(); });
         StartInk = new(_ => Start(AttentionRule.Ink));
         StartWord = new(_ => Start(AttentionRule.Word));
+        StartShift = new(_ => Start(AttentionRule.Shift));
         Answer = new(p => Respond(Enum.Parse<Pigment>((string)p!)), () => playing && !feedback);
         Next = new(_ => Advance(), () => feedback);
         Home = new(_ => { ClearScreens(); message = "The kettle is on. Stay a little longer."; Refresh(); });
@@ -38,6 +39,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
     public event PropertyChangedEventHandler? PropertyChanged;
     public RelayCommand StartInk { get; }
     public RelayCommand StartWord { get; }
+    public RelayCommand StartShift { get; }
     public RelayCommand Answer { get; }
     public RelayCommand Next { get; }
     public RelayCommand Home { get; }
@@ -61,17 +63,17 @@ public sealed class MainViewModel : INotifyPropertyChanged
     public string Message => message;
     public string Word => shown?.Word.ToString().ToUpperInvariant() ?? "BLUE";
     public string Ink => shown?.Ink switch { Pigment.Rose => "#94364B", Pigment.Green => "#35715C", Pigment.Gold => "#926715", _ => "#215B9A" };
-    public string Rule => game.Session?.Rule == AttentionRule.Word ? "Read the WORD. Ignore its ink." : "Choose the INK colour. Ignore the word.";
-    public string Counter => $"BRUSHSTROKE {Math.Min((game.Session?.Answered ?? 0) + (feedback ? 0 : 1), 12):00} / 12";
-    public double ProgressPercent => (game.Session?.Answered ?? 0) / 12d * 100;
+    public string Rule => game.Session?.CurrentRule == AttentionRule.Word ? "WORD spotlight — read the word. Ignore its ink." : "INK spotlight — choose the ink colour. Ignore the word.";
+    public string Counter => $"BRUSHSTROKE {Math.Min((game.Session?.Answered ?? 0) + (feedback ? 0 : 1), game.Session?.Total ?? 12):00} / {game.Session?.Total ?? 12}";
+    public double ProgressPercent => (game.Session?.Answered ?? 0) / (double)(game.Session?.Total ?? 12) * 100;
     public string NextLabel => game.Session?.Complete == true ? "Finish this sitting  →" : "Next brushstroke  →";
-    public string Result => $"{game.Session?.Correct} of 12 colours found";
+    public string Result => $"{game.Session?.Correct} of {game.Session?.Total} colours found";
     public string Comparison
     {
         get
         {
             var answers = game.Session?.Answers;
-            return answers is null ? "" : $"Matching word + ink: {answers.Count(a => a.Prompt.IsCongruent && a.Correct)} / 6     ·     Conflicting: {answers.Count(a => !a.Prompt.IsCongruent && a.Correct)} / 6";
+            return answers is null ? "" : $"Matching: {answers.Count(a => a.Prompt.IsCongruent && a.Correct)} / {answers.Count(a => a.Prompt.IsCongruent)}     ·     Conflicting: {answers.Count(a => !a.Prompt.IsCongruent && a.Correct)} / {answers.Count(a => !a.Prompt.IsCongruent)}";
         }
     }
     private void Start(AttentionRule rule)
@@ -79,15 +81,16 @@ public sealed class MainViewModel : INotifyPropertyChanged
         ClearScreens();
         shown = game.Start(rule).Current;
         playing = true; feedback = summary = SaveFailed = false;
-        message = "Take your time. Select a paint below, or use keys 1–4.";
+        message = rule == AttentionRule.Shift ? "Watch the spotlight: the rule will change. Select a paint below, or use keys 1–4." : "Take your time. Select a paint below, or use keys 1–4.";
         Refresh();
     }
     private void ClearScreens() => playing = feedback = summary = opera = quiet = false;
     private void Respond(Pigment choice)
     {
-        var result = game.Session!.Submit(choice);
+        var activeRule = game.Session!.CurrentRule;
+        var result = game.Session.Submit(choice);
         feedback = true;
-        var target = game.Session.Rule == AttentionRule.Ink ? result.Prompt.Ink : result.Prompt.Word;
+        var target = activeRule == AttentionRule.Ink ? result.Prompt.Ink : result.Prompt.Word;
         message = result.Correct ? "Lovely. A little moment of attention, caught in colour." : $"This one was {target.ToString().ToLowerInvariant()}. The word and its colour can pull in different directions.";
         Refresh();
     }

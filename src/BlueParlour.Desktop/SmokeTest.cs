@@ -34,18 +34,34 @@ internal static class SmokeTest
         Capture(window, output, "summary");
         vm.Home.Execute(null);
         Capture(window, output, "collected");
+        vm.StartShift.Execute(null);
+        while (!game.Session!.Complete)
+        {
+            var prompt = game.Session.Current!;
+            var answer = game.Session.CurrentRule == Domain.AttentionRule.Ink ? prompt.Ink : prompt.Word;
+            vm.Answer.Execute(answer.ToString()); vm.Next.Execute(null);
+        }
+        if (!vm.IsSummary || game.Session.Correct != 18) throw new InvalidOperationException("Shifting spotlight failed.");
+        vm.Home.Execute(null);
         vm.StartOpera.Execute(null);
         if (!vm.IsOpera || vm.IsHome || vm.Answer.CanExecute("Blue")) throw new InvalidOperationException("Opera navigation failed.");
         Capture(window, output, "opera");
-        for (var replay = 0; replay < 5; replay++)
+        for (var act = 0; act < 3; act++)
         {
             foreach (var pair in vm.Opera.Cards.GroupBy(card => card.Motif))
                 foreach (var card in pair) card.Choose.Execute(null);
             if (!vm.Opera.Complete) throw new InvalidOperationException("Opera completion failed.");
-            if (replay == 0) Capture(window, output, "opera-complete");
-            vm.Opera.Replay.Execute(null);
-            if (vm.Opera.Complete) throw new InvalidOperationException("Opera replay did not reset.");
+            if (act < 2) vm.Opera.NextAct.Execute(null);
         }
+        Capture(window, output, "opera-complete");
+        vm.Opera.Replay.Execute(null);
+        if (vm.Opera.Complete || vm.Opera.Cards.Count != 8) throw new InvalidOperationException("Opera encore did not reset.");
+        var different = vm.Opera.Cards.GroupBy(card => card.Motif).Select(group => group.First()).Take(2).ToArray();
+        different[0].Choose.Execute(null); different[1].Choose.Execute(null);
+        if (!vm.Opera.AwaitingCurtain || different[0].Choose.CanExecute(null)) throw new InvalidOperationException("Opera mismatch gating failed.");
+        Capture(window, output, "opera-mismatch");
+        vm.Opera.Continue.Execute(null);
+        if (vm.Opera.AwaitingCurtain) throw new InvalidOperationException("Opera curtain failed.");
         vm.Home.Execute(null);
         vm.StartQuiet.Execute(null);
         Capture(window, output, "quiet");
@@ -61,7 +77,7 @@ internal static class SmokeTest
         Capture(window, output, "small");
         vm.StartOpera.Execute(null);
         Capture(window, output, "opera-small");
-        File.WriteAllText(Path.Combine(output, "success.txt"), "Attention sittings, five opera replays, quiet moments, icon, input gating, and ten WPF renders passed.");
+        File.WriteAllText(Path.Combine(output, "success.txt"), "Attention sittings, shifting rules, three opera acts, mismatch curtain, encore, quiet moments, icon, input gating, and eleven WPF renders passed.");
         window.Close();
     }
     private static void Capture(MainWindow window, string output, string name)

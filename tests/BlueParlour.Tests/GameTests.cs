@@ -28,6 +28,21 @@ public class GameTests
   Assert.Equal(12, session.Correct);
   Assert.Equal(6, session.Answers.Count(a => a.Prompt.IsCongruent));
  }
+ [Fact] public void ShiftingSpotlightChangesRuleAndUsesEighteenTrials()
+ {
+  var game = new ParlourGame(new MemoryStore(), new Random(42));
+  var session = game.Start(AttentionRule.Shift);
+  var seenRules = new List<AttentionRule>();
+  Assert.Equal(18, session.Total);
+  while (!session.Complete)
+  {
+   var rule = session.CurrentRule; seenRules.Add(rule);
+   session.Submit(rule == AttentionRule.Ink ? session.Current!.Ink : session.Current!.Word);
+  }
+  Assert.Contains(AttentionRule.Ink, seenRules);
+  Assert.Contains(AttentionRule.Word, seenRules);
+  Assert.Equal(18, session.Correct);
+ }
  [Fact] public void OnlyCompletedSessionsEarnOneRewardRegardlessOfScore()
  {
   var store = new MemoryStore(); var game = new ParlourGame(store, new Random(1));

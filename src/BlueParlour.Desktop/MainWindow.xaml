@@ -75,13 +75,13 @@
       <TextBlock Text="An evening, unhurried." FontFamily="Georgia" FontSize="35"/>
       <TextBlock Text="Choose a small ritual. You can stop whenever you like; there is no streak to keep or deadline to meet." FontSize="15" LineHeight="23" Margin="0,12,0,17"/>
       <Button Command="{Binding StartOpera}" Background="#244F73" Foreground="#FFF7E9" Padding="16,14">
-       <StackPanel><TextBlock Text="The Midnight Opera" Foreground="#FFF7E9" FontFamily="Georgia" FontSize="24"/><TextBlock Text="Three visible pairs · a tiny Phantom-inspired interlude" Foreground="#C8DAE4" Margin="0,6,0,0" FontSize="13"/></StackPanel>
+       <StackPanel><TextBlock Text="The Midnight Opera" Foreground="#FFF7E9" FontFamily="Georgia" FontSize="24"/><TextBlock Text="Three acts · hidden pairs · memory and mastery" Foreground="#C8DAE4" Margin="0,6,0,0" FontSize="13"/></StackPanel>
       </Button>
       <Button Command="{Binding StartQuiet}" Margin="0,10,0,0" Padding="16,14">
        <StackPanel><TextBlock Text="A quiet moment" FontFamily="Georgia" FontSize="23"/><TextBlock Text="Three optional pauses · no puzzle to solve" Margin="0,6,0,0" FontSize="13"/></StackPanel>
       </Button>
       <TextBlock Text="OR, A LITTLE CURIOSITY" FontSize="10" Foreground="#7B6546" Margin="0,19,0,10"/>
-      <UniformGrid Columns="2"><Button Command="{Binding StartInk}" Content="Follow the ink" Margin="0,0,5,0"/><Button Command="{Binding StartWord}" Content="Follow the word" Margin="5,0,0,0"/></UniformGrid>
+      <UniformGrid Columns="3"><Button Command="{Binding StartInk}" Content="Follow ink" Margin="0,0,4,0"/><Button Command="{Binding StartWord}" Content="Follow word" Margin="4,0"/><Button Command="{Binding StartShift}" Content="Shifting spotlight" Margin="4,0,0,0" Background="#DDE9EC"/></UniformGrid>
       <TextBlock Text="The original twelve-card attention games. Your keepsakes are still here." FontSize="12" Foreground="#6C746F" Margin="0,11,0,0"/>
      </StackPanel>
      <Grid Visibility="{Binding IsOpera, Converter={StaticResource Visible}}">
@@ -137,7 +137,7 @@
     </Grid>
    </Border>
   </Grid>
-  <TextBlock Grid.Row="2" Text="AN EDUCATIONAL PLAYTHING, NOT A CLINICAL TEST.                         v0.2 · THE BLUE PARLOUR" Foreground="#AFC1CD" FontSize="10" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+  <TextBlock Grid.Row="2" Text="AN EDUCATIONAL PLAYTHING, NOT A CLINICAL TEST.                         v0.3 · THE BLUE PARLOUR" Foreground="#AFC1CD" FontSize="10" VerticalAlignment="Center" HorizontalAlignment="Center"/>
  </Grid>
  </Viewbox>
  </Border>

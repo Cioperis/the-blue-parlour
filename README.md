@@ -1,13 +1,15 @@
 # The Blue Parlour
 
-A small, offline Windows game for an unhurried break: a visible opera matching puzzle, optional quiet moments, and the original attention cards. Blue, burgundy roses, and a sleeping cat. No accounts, timers, ads, telemetry, or purchases.
+A small, offline Windows game for an unhurried challenge: a three-act opera memory puzzle, optional quiet moments, and attention-switching cards. Blue, burgundy roses, and a sleeping cat. No accounts, timers, ads, telemetry, or purchases.
 
-## New in v0.2.0
+## New in v0.3.0
 
-- **The Midnight Opera:** match three visible pairs of original masks, roses and candles to light a miniature theatre. Six clicks can complete a scene. Cards reshuffle on replay, with three possible closing messages. All cards remain visible; a mismatch simply clears the selection, without undoing completed pairs. Clicking the selected card lets you change your mind.
-- **A quiet moment:** three optional, untimed prompts about noticing your surroundings, comfortable breathing, and one small next step. Continue also skips a prompt. There are no required breathing counts, holds, personal entries, or ratings.
-- Original cat-and-rose Windows icon, embedded in the EXE and window; seven sizes from 16 to 256 pixels. Regenerate it on Windows with `scripts/create-icon.ps1`.
-- A calmer front page and Escape to return to the parlour from any activity. The new activities need no unlock and have no streak, score, timer, or saved completion requirement.
+- **Midnight Opera is now a three-act memory game.** Act I has four hidden pairs, Act II five, and Act III six. Reveal two cards at a time; mismatches remain visible until you lower the curtain, so you control the pace. Completed pairs stay lit and fixed in place.
+- Each act counts pair attempts and offers an optional mastery target. There is no countdown or fail state. An encore reshuffles all three acts.
+- The deck now includes six original motifs: mask, rose, candle, key, music and moon.
+- **Shifting Spotlight** adds an 18-card executive-attention challenge. The cue switches between naming ink and reading the word, with mostly conflicting stimuli. The current rule is always explicit.
+- The quiet-moment activity, fixed-rule attention modes, game icon and existing saved keepsakes remain available.
+- CI now uses current Node 24-based GitHub actions.
 
 The opera interlude uses original geometric art and text inspired by the Phantom atmosphere. It contains no music, lyrics, recordings, or artwork from a stage or film production. It is silent. The optional pauses are general relaxation invitations, not a treatment or assessment of stress or uncertainty.
 
@@ -15,8 +17,9 @@ The opera interlude uses original geometric art and text inspired by the Phantom
 
 Download `TheBlueParlour-win-x64.zip` from **Releases** (or a successful **Actions** run), extract it, and double-click `TheBlueParlour.exe`. The .NET runtime is bundled. Windows x64 is the supported target. This prototype is unsigned, so Windows may show a publisher warning. Signing is a future distribution step.
 
-- **The Midnight Opera:** choose matching pictures using the mouse or Tab and Space. Match three pairs, then replay or leave.
+- **The Midnight Opera:** reveal hidden cards using the mouse or Tab and Space. Complete three increasingly difficult acts, then try an encore.
 - **A quiet moment:** take or skip three invitations at your own pace. Escape returns home.
+- **Shifting Spotlight:** follow the rule shown above each card; it changes between ink and word across 18 trials.
 - **Follow the ink:** choose the ink colour, ignoring the word.
 - **Follow the word:** choose the written word, ignoring its ink.
 - Click a paint or press **1–4**. Press **Enter** for the next card after feedback. Tab and Space also work.
@@ -52,9 +55,9 @@ Desktop ───────> Application ───────> Domain
 | Desktop | Composition root, MVVM, commands, keyboard input, original vector room | `App.xaml.cs`, `MainViewModel.cs`, `MainWindow.xaml` |
 | Tests | Rule behavior, balance, rewards, save recovery | `GameTests.cs` |
 
-An answer moves from a WPF command → view model → domain session. The application awards a keepsake only after completion and persists it through `IProgressStore`. `OperaSession` owns pair selection and completion independently of WPF. `OperaViewModel` projects card state and shuffles replay decks; `QuietViewModel` owns the optional pause sequence. The domain knows nothing about WPF or disk. The view model owns transient presentation states, including feedback and result screens. Dependency injection is explicit in the composition root; no service locator, mediator or container is needed here.
+An answer moves from a WPF command → view model → domain session. The application awards a keepsake only after completion and persists it through `IProgressStore`. `OperaSession` owns concealed-card state, mismatch resolution, turns, pair selection and completion independently of WPF. `OperaViewModel` progresses the three acts, computes mastery targets and shuffles replay decks; `QuietViewModel` owns the optional pause sequence. `AttentionSession` resolves a per-card rule in shifting mode. The domain knows nothing about WPF or disk. The view model owns transient presentation states, including feedback and result screens. Dependency injection is explicit in the composition root; no service locator, mediator or container is needed here.
 
-`--smoke-test <output-folder>` runs three deterministic sittings against in-memory storage, checks input gating and progression, also completes five opera replays and quiet-moment navigation, checks the window icon, and renders ten offscreen WPF screenshots. CI runs this against the **published executable**, so startup and bundling are checked as well as the domain tests. It never reads or changes the player's save. It is not a substitute for a manual keyboard/mouse check on the recipient's PC.
+`--smoke-test <output-folder>` runs deterministic attention sittings against in-memory storage, completes shifting mode and all three opera acts, exercises a mismatch and encore, checks quiet-moment navigation and the window icon, and renders ten offscreen WPF screenshots. CI runs this against the **published executable**, so startup and bundling are checked as well as the domain tests. It never reads or changes the player's save. It is not a substitute for a manual keyboard/mouse check on the recipient's PC.
 
 ## GitHub Actions
 
@@ -63,13 +66,13 @@ Every main-branch push and pull request builds, tests, publishes a self-containe
 Pushing a `v*` tag runs the same verification and then creates a GitHub Release with the ZIP. Only the release job receives `contents: write`; build jobs are read-only. No personal access token or custom secret is needed. Releases inherit this repository's private visibility. To give the game to someone without repository access, send them the downloaded ZIP.
 
 ```powershell
-git tag v0.1.0
-git push origin v0.1.0
+git tag v0.3.0
+git push origin v0.3.0
 ```
 
 ## Educational basis and limits
 
-The colour-naming mode is inspired by the **Stroop effect**: ink naming commonly takes longer when a colour word and its ink conflict. The word-reading mode is a relaxed variation. Each sitting contains six matching and six conflicting cards in shuffled order.
+The colour-naming mode is inspired by the **Stroop effect**: ink naming commonly takes longer when a colour word and its ink conflict. Fixed-rule sittings contain six matching and six conflicting cards. Shifting Spotlight contains 18 cards and adds explicit rule switching; it is a game mechanic rather than a validated cognitive task.
 
 There is no response-time measurement, normative comparison, diagnostic scoring, or claim of therapeutic benefit. Accuracy counts are game feedback only; they do not demonstrate an individual's Stroop effect or assess attention, intelligence, mental health, or clinical competence. Content is original and paraphrased; no test instrument or APA artwork is reproduced.
 
