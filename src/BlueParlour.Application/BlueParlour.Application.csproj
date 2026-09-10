@@ -1,0 +1,3 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup><ProjectReference Include="../BlueParlour.Domain/BlueParlour.Domain.csproj" /></ItemGroup>
+</Project>

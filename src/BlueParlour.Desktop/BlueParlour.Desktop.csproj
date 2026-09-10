@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <OutputType>WinExe</OutputType>
+    <UseWPF>true</UseWPF>
+    <AssemblyName>TheBlueParlour</AssemblyName>
+    <Version>0.1.0</Version>
+    <Description>A cozy little exploration of attention.</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../BlueParlour.Application/BlueParlour.Application.csproj" />
+    <ProjectReference Include="../BlueParlour.Infrastructure/BlueParlour.Infrastructure.csproj" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,64 @@
+name: Build, test and package Windows
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - run: dotnet restore BlueParlour.sln
+      - run: dotnet build BlueParlour.sln -c Release --no-restore
+      - run: dotnet test BlueParlour.sln -c Release --no-build --logger trx --results-directory artifacts/test-results
+      - name: Publish self-contained executable
+        shell: pwsh
+        run: ./scripts/publish.ps1
+      - name: Smoke-test bundled executable
+        shell: pwsh
+        run: |
+          $process = Start-Process ./artifacts/win-x64/TheBlueParlour.exe -ArgumentList '--smoke-test', "$pwd/artifacts/smoke" -WindowStyle Hidden -PassThru
+          if (-not $process.WaitForExit(30000)) { $process.Kill(); throw 'Smoke test timed out' }
+          if ($process.ExitCode -ne 0) { throw 'Smoke test failed' }
+          if (-not (Test-Path artifacts/smoke/success.txt)) { throw 'Smoke result missing' }
+      - name: Package
+        shell: pwsh
+        run: |
+          Compress-Archive artifacts/win-x64/TheBlueParlour.exe artifacts/TheBlueParlour-win-x64.zip
+          (Get-FileHash artifacts/TheBlueParlour-win-x64.zip -Algorithm SHA256).Hash + '  TheBlueParlour-win-x64.zip' | Set-Content artifacts/SHA256SUMS.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: TheBlueParlour-win-x64
+          path: |
+            artifacts/TheBlueParlour-win-x64.zip
+            artifacts/SHA256SUMS.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: verification
+          path: |
+            artifacts/test-results
+            artifacts/smoke
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: windows
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: TheBlueParlour-win-x64
+          path: release
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: gh release create "$GITHUB_REF_NAME" release/* --title "The Blue Parlour $GITHUB_REF_NAME" --generate-notes --verify-tag
