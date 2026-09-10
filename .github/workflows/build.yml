@@ -61,4 +61,10 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-        run: gh release create "$GITHUB_REF_NAME" release/* --title "The Blue Parlour $GITHUB_REF_NAME" --generate-notes --verify-tag
+        run: |
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" release/* --clobber
+          elif ! gh release create "$GITHUB_REF_NAME" release/* --title "The Blue Parlour $GITHUB_REF_NAME" --generate-notes --verify-tag; then
+            # A duplicate tag delivery may have created the release between the view and create calls.
+            gh release upload "$GITHUB_REF_NAME" release/* --clobber
+          fi
